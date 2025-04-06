@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threat Analysis</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
+        .container { max-width: 700px; margin: auto; }
+        input[type="text"] { width: 80%; padding: 10px; margin-bottom: 10px; }
+        button { padding: 10px 20px; background: #007BFF; color: white; border: none; cursor: pointer; }
+        .result-box { text-align: left; background: #f4f4f4; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .high { color: red; font-weight: bold; }
+        .medium { color: orange; font-weight: bold; }
+        .low { color: green; font-weight: bold; }
+        ul { padding-left: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Threat Analysis Tool</h1>
+        <form method="POST">
+            <input type="text" name="url" placeholder="Enter URL (Surface or .onion)" required>
+            <button type="submit">Analyze</button>
+        </form>
+
+        {% if url %}
+            <h2>Results for: {{ url }}</h2>
+            {% if analysis.error %}
+                <p style="color: red;">{{ analysis.error }}</p>
+            {% else %}
+                <div class="result-box">
+                    <h3>Risk Level: 
+                        <span class="{% if analysis['Risk Level'] == 'HIGH' %}high{% elif analysis['Risk Level'] == 'MEDIUM' %}medium{% else %}low{% endif %}">
+                            {{ analysis['Risk Level'] }}
+                        </span>
+                    </h3>
+                    <h4>📌 Detected PII:</h4>
+                    <ul>
+                        {% for category, items in analysis['PII'].items() %}
+                            {% if items %}
+                                <li><strong>{{ category }}:</strong> {{ items | join(", ") }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+
+                    <h4>Detected Keywords:</h4>
+                    {% if analysis['Keywords'] %}
+                        <ul>
+                            {% for keyword in analysis['Keywords'] %}
+                                <li>{{ keyword }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No suspicious keywords found.</p>
+                    {% endif %}
+
+                    <h4>Suspicious Domains:</h4>
+                    {% if analysis['Suspicious Domains'] %}
+                        <ul>
+                            {% for domain in analysis['Suspicious Domains'] %}
+                                <li>{{ domain }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No suspicious domains detected.</p>
+                    {% endif %}
+                </div>
+
+                <!-- 🔍 LLM Insights Section -->
+                {% if llm_insights %}
+                    <div class="result-box">
+                        <h3>🔍 LLM Insights</h3>
+                        <p>{{ llm_insights }}</p>
+                    </div>
+                {% endif %}
+
+            {% endif %}
+        {% endif %}
+    </div>
+</body>
+</html>
